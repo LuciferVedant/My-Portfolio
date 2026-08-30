@@ -8,7 +8,7 @@ const skillCategories = [
   {
     title: 'Programming Languages',
     icon: Code,
-    color: 'from-indigo-500 to-blue-500',
+    color: 'from-emerald-500 to-blue-500',
     skills: [
       { name: 'C++ (DSA)', level: 'Advanced', tags: ['Data Structures', 'Algorithms'] },
       { name: 'TypeScript', level: 'Expert', tags: ['Typed Architecture', 'Strict Null Checks'] },
@@ -22,7 +22,7 @@ const skillCategories = [
   {
     title: 'Libraries & Frameworks',
     icon: Layers,
-    color: 'from-purple-500 to-pink-500',
+    color: 'from-teal-500 to-pink-500',
     skills: [
       { name: 'React.js', level: 'Expert', tags: ['Hooks', 'Virtual DOM', 'Context API'] },
       { name: 'Next.js', level: 'Expert', tags: ['App Router', 'SSR', 'SSG', 'API Routes'] },
@@ -37,7 +37,7 @@ const skillCategories = [
   {
     title: 'Tools, Cloud & Platforms',
     icon: Wrench,
-    color: 'from-cyan-500 to-emerald-500',
+    color: 'from-lime-500 to-emerald-500',
     skills: [
       { name: 'Docker', level: 'Advanced', tags: ['Containerization', 'Docker Compose'] },
       { name: 'PostgreSQL & MySQL', level: 'Advanced', tags: ['Relational DBs', 'Indexing'] },
@@ -58,14 +58,14 @@ export default function SkillsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-4 text-center max-w-2xl mx-auto"
       >
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-mono text-indigo-300">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-black/60 border border-emerald-500/30 text-xs font-mono text-emerald-300">
           <Cpu className="w-3.5 h-3.5" />
           <span>Skills & Technical Stack</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Technical <span className="text-gradient-purple">Competencies</span>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-emerald-50 tracking-tight">
+          Technical <span className="text-gradient-teal">Competencies</span>
         </h1>
-        <p className="text-slate-300 text-sm">
+        <p className="text-emerald-100/70 text-sm">
           A comprehensive breakdown of programming languages, frameworks, cloud tools, and databases.
         </p>
       </motion.div>
@@ -83,26 +83,26 @@ export default function SkillsPage() {
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               className="space-y-4"
             >
-              <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-3 border-b border-emerald-500/15 pb-3">
                 <div
-                  className={`w-9 h-9 rounded-xl bg-gradient-to-r ${cat.color} flex items-center justify-center text-white shadow-lg`}
+                  className={`w-9 h-9 rounded-sm bg-gradient-to-r ${cat.color} flex items-center justify-center text-emerald-50 shadow-lg`}
                 >
                   <Icon className="w-4 h-4" />
                 </div>
-                <h2 className="text-xl font-bold text-white tracking-wide">{cat.title}</h2>
+                <h2 className="text-xl font-bold text-emerald-50 tracking-wide">{cat.title}</h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {cat.skills.map((skill, sIdx) => (
                   <div
                     key={sIdx}
-                    className="glass-card p-4 rounded-xl space-y-2 border border-slate-800 hover:border-indigo-500/40 transition-all group"
+                    className="glass-card p-4 rounded-sm space-y-2 border border-emerald-500/15 hover:border-emerald-500/40 transition-all group"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">
+                      <span className="text-sm font-bold text-emerald-50 group-hover:text-emerald-400 transition-colors">
                         {skill.name}
                       </span>
-                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                         {skill.level}
                       </span>
                     </div>
@@ -111,7 +111,7 @@ export default function SkillsPage() {
                       {skill.tags.map((t, tIdx) => (
                         <span
                           key={tIdx}
-                          className="px-2 py-0.5 rounded bg-slate-900 text-[10px] font-mono text-slate-400 border border-slate-800"
+                          className="px-2 py-0.5 rounded bg-black/70 text-[10px] font-mono text-emerald-500/60 border border-emerald-500/15"
                         >
                           {t}
                         </span>

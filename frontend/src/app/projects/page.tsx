@@ -55,7 +55,7 @@ const projectList = [
     badge: 'Core Engine',
   },
   {
-    id: 'purplecms',
+    id: 'tealcms',
     title: 'PurpleCMS & EMRD 2.0 (UNMH Hospitals)',
     category: 'Healthcare IT Enterprise',
     period: '2024 - 2025',
@@ -102,14 +102,14 @@ export default function ProjectsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-4 text-center max-w-2xl mx-auto"
       >
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-mono text-indigo-300">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-black/60 border border-emerald-500/30 text-xs font-mono text-emerald-300">
           <FolderGit2 className="w-3.5 h-3.5" />
           <span>Featured Software Projects</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Engineering <span className="text-gradient-purple">Portfolio</span>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-emerald-50 tracking-tight">
+          Engineering <span className="text-gradient-teal">Portfolio</span>
         </h1>
-        <p className="text-slate-300 text-sm">
+        <p className="text-emerald-100/70 text-sm">
           Architectural solutions built with React, Go, Java Spring Boot, TypeScript, and Docker.
         </p>
       </motion.div>
@@ -118,11 +118,10 @@ export default function ProjectsPage() {
       <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
         <button
           onClick={() => setSelectedTech(null)}
-          className={`px-3 py-1.5 rounded-full transition-all ${
-            selectedTech === null
-              ? 'bg-indigo-600 text-white font-semibold shadow-md'
-              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-          }`}
+          className={`px-3 py-1.5 rounded-full transition-all ${selectedTech === null
+              ? 'bg-emerald-600 text-emerald-50 font-semibold shadow-md'
+              : 'bg-black/70 text-emerald-500/60 hover:text-emerald-50 border border-emerald-500/15'
+            }`}
         >
           All Projects ({projectList.length})
         </button>
@@ -130,11 +129,10 @@ export default function ProjectsPage() {
           <button
             key={tech}
             onClick={() => setSelectedTech(tech)}
-            className={`px-3 py-1.5 rounded-full font-mono transition-all ${
-              selectedTech === tech
-                ? 'bg-indigo-600 text-white font-semibold shadow-md'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-            }`}
+            className={`px-3 py-1.5 rounded-full font-mono transition-all ${selectedTech === tech
+                ? 'bg-emerald-600 text-emerald-50 font-semibold shadow-md'
+                : 'bg-black/70 text-emerald-500/60 hover:text-emerald-50 border border-emerald-500/15'
+              }`}
           >
             {tech}
           </button>
@@ -151,39 +149,39 @@ export default function ProjectsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: idx * 0.1 }}
-              className="glass-card p-6 rounded-3xl space-y-5 flex flex-col justify-between border border-white/10 hover:border-indigo-500/40"
+              className="glass-card p-6 rounded-md space-y-5 flex flex-col justify-between border border-emerald-500/15 hover:border-emerald-500/40"
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                  <div className="w-10 h-10 rounded-sm bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-mono font-bold tracking-wide border border-indigo-500/30">
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold tracking-wide border border-emerald-500/30">
                     {proj.badge}
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">
+                  <h3 className="text-xl font-bold text-emerald-50 group-hover:text-emerald-400 transition-colors">
                     {proj.title}
                   </h3>
-                  <div className="text-xs text-slate-400 font-mono mt-1">
+                  <div className="text-xs text-emerald-500/60 font-mono mt-1">
                     {proj.category} • {proj.period}
                   </div>
                 </div>
 
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                <p className="text-xs sm:text-sm text-emerald-100/70 leading-relaxed">
                   {proj.description}
                 </p>
 
                 <div className="space-y-1.5 pt-2">
-                  <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">
+                  <span className="text-[11px] font-mono text-emerald-500/60 uppercase tracking-wider block">
                     Key Achievements:
                   </span>
-                  <ul className="space-y-1 text-xs text-slate-300">
+                  <ul className="space-y-1 text-xs text-emerald-100/70">
                     {proj.highlights.map((h, hIdx) => (
                       <li key={hIdx} className="flex items-start gap-2">
-                        <span className="text-indigo-400 font-bold">•</span>
+                        <span className="text-emerald-400 font-bold">•</span>
                         <span>{h}</span>
                       </li>
                     ))}
@@ -191,24 +189,24 @@ export default function ProjectsPage() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 space-y-3">
+              <div className="pt-4 border-t border-emerald-500/15 space-y-3">
                 <div className="flex flex-wrap gap-1.5">
                   {proj.tech.map((t, tIdx) => (
                     <span
                       key={tIdx}
-                      className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-mono text-indigo-300"
+                      className="px-2 py-0.5 rounded bg-black/70 border border-emerald-500/15 text-[10px] font-mono text-emerald-300"
                     >
                       {t}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-slate-400 font-mono pt-1">
+                <div className="flex items-center justify-between text-xs text-emerald-500/60 font-mono pt-1">
                   <a
                     href="https://github.com/vedrocks2000"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-1.5 hover:text-white transition-colors"
+                    className="flex items-center gap-1.5 hover:text-emerald-50 transition-colors"
                   >
                     <Github className="w-3.5 h-3.5" />
                     Source Code

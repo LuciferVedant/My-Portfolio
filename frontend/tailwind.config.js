@@ -7,21 +7,29 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        mono: ['var(--font-mono)', '"JetBrains Mono"', '"Fira Code"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
       colors: {
-        background: '#07090e',
-        surface: '#0f172a',
-        'surface-highlight': '#1e293b',
+        background: '#010302',
+        surface: '#040e09',
+        'surface-highlight': '#0a1f14',
         accent: {
-          blue: '#38bdf8',
-          indigo: '#6366f1',
-          purple: '#a855f7',
-          cyan: '#06b6d4',
+          blue: '#2dffdc',
+          indigo: '#00ff66',
+          purple: '#22c55e',
+          cyan: '#5eead4',
+          matrix: '#00ff66',
         },
       },
       animation: {
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         float: 'float 6s ease-in-out infinite',
         'glow-pulse': 'glow 3s ease-in-out infinite alternate',
+        'matrix-fall': 'matrixFall linear infinite',
+        'spin-slow': 'spin 12s linear infinite',
+        'spin-reverse': 'spin-reverse 16s linear infinite',
+        'border-flow': 'borderFlow 3s linear infinite',
       },
       keyframes: {
         float: {
@@ -31,6 +39,18 @@ module.exports = {
         glow: {
           '0%': { opacity: '0.4', filter: 'blur(20px)' },
           '100%': { opacity: '0.8', filter: 'blur(30px)' },
+        },
+        matrixFall: {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(100%)' },
+        },
+        'spin-reverse': {
+          from: { transform: 'rotate(360deg)' },
+          to: { transform: 'rotate(0deg)' },
+        },
+        borderFlow: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '100%': { backgroundPosition: '200% 50%' },
         },
       },
     },
