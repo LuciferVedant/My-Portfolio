@@ -19,7 +19,7 @@ export class ExperienceService {
       company: 'POSTQODE, ELEVENXN TECHNOLOGIES PVT LTD',
       role: 'Software Engineer',
       period: 'May 2025 – Present',
-      location: 'Bangalore, India',
+      location: 'Bengaluru, Karnataka, India',
       isCurrent: true,
       bullets: [
         'Contributed to the development of the PostQode Extension and its accompanying Web User Interface using React TypeScript (Redux-Toolkit) and Java (Spring Boot).',
@@ -33,7 +33,7 @@ export class ExperienceService {
       company: 'PURPLEDOCS PVT LTD',
       role: 'Jr Frontend Developer',
       period: 'Sep 2024 – May 2025',
-      location: 'Jabalpur, India',
+      location: 'Bengaluru, Karnataka, India',
       bullets: [
         'Led the development of content management application (PurpleCMS) for UNMH Hospitals, successfully deployed on their servers.',
         'Designed and developed the user interface using React.js, Redux-Toolkit, and TypeScript for EMRD 2.0, enhancing usability and patient file management.',
@@ -46,7 +46,7 @@ export class ExperienceService {
       company: 'SECUREDAPP',
       role: 'Software Developer Intern',
       period: 'Dec 2023 – June 2024',
-      location: 'Jabalpur, India',
+      location: 'Bengaluru, Karnataka, India',
       bullets: [
         'Designed and implemented UI components like payment status pages and blog pages using React.js.',
         'Developed PDF generation engine and interactive charts for Solidity Shield scan reports, enhancing security report visualization.',

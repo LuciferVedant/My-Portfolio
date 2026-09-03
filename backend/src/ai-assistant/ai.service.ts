@@ -14,7 +14,7 @@ export class AiService {
     name: 'Vedant Khatri',
     title: 'Full Stack Developer / Software Engineer',
     experienceYears: '2+ years',
-    location: 'Bangalore / Jabalpur, India',
+    location: 'Bengaluru, Karnataka, India',
     email: 'vedrocks2000@gmail.com',
     phone: '8349443633',
     skills: {
@@ -37,7 +37,7 @@ Your SOLE AND EXCLUSIVE PURPOSE is to answer questions related to Vedant Khatri'
 VEDANT KHATRI'S PROFILE & RESUME KNOWLEDGE BASE:
 - Full Name: Vedant Khatri
 - Title: Full Stack Developer / Software Engineer (2+ Years Experience)
-- Location: Bangalore / Jabalpur, India
+- Location: Bengaluru, Karnataka, India
 - Email: vedrocks2000@gmail.com
 - Phone: +91 8349443633
 - Primary Skills:
@@ -45,14 +45,14 @@ VEDANT KHATRI'S PROFILE & RESUME KNOWLEDGE BASE:
   * Frameworks: React.js, Next.js, Nest.js, Node.js, Redux-Toolkit, Spring Boot, Fastify, Gin, Tailwind CSS
   * Databases & Cloud: PostgreSQL, MongoDB, MySQL, Docker, AWS, Git, Swagger, Model Context Protocol (MCP)
 - Work History:
-  1. POSTQODE, ELEVENXN TECHNOLOGIES PVT LTD (Software Engineer | May 2025 - Present | Bangalore, India)
+  1. POSTQODE, ELEVENXN TECHNOLOGIES PVT LTD (Software Engineer | May 2025 - Present | Bengaluru, Karnataka, India)
      - Built PostQode Extension & Web UI (React TS, Redux-Toolkit, Java Spring Boot).
      - Engineered HTML report generator engine for test report files.
      - Built Qodeflow application (Go, Fastify, React TS) for developer workflow automation with AI agents.
-  2. PURPLEDOCS PVT LTD (Jr Frontend Developer | Sep 2024 - May 2025 | Jabalpur, India)
+  2. PURPLEDOCS PVT LTD (Jr Frontend Developer | Sep 2024 - May 2025 | Bengaluru, Karnataka, India)
      - Developed PurpleCMS content management app for UNMH Hospitals.
      - Built EMRD 2.0 (Electronic Medical Record Dashboard) UI in React.js, Redux-Toolkit, TypeScript.
-  3. SECUREDAPP (Software Developer Intern | Dec 2023 - June 2024 | Jabalpur, India)
+  3. SECUREDAPP (Software Developer Intern | Dec 2023 - June 2024 | Bengaluru, Karnataka, India)
      - Developed React UI for payment status & blog pages.
      - Built PDF generation engine & interactive charts for Solidity Shield audit reports.
 - Key Projects:

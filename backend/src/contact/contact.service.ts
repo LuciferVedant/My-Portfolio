@@ -15,6 +15,7 @@ export interface ContactLog {
   ipAddress?: string;
   emailNotificationSent: boolean;
   webhookPushSent: boolean;
+  isSpamThrottled?: boolean;
 }
 
 @Injectable()
@@ -22,6 +23,10 @@ export class ContactService {
   private readonly logger = new Logger(ContactService.name);
   private transporter: nodemailer.Transporter;
   private readonly dbFilePath = path.join(process.cwd(), 'data', 'contacts-db.json');
+
+  // Cooldown map to prevent duplicate emails from the same IP or Email (5 minutes cooldown)
+  private readonly cooldownMap = new Map<string, number>();
+  private readonly COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
 
   constructor() {
     // Ensure data directory exists for local DB storage
@@ -70,68 +75,88 @@ export class ContactService {
   async handleContactSubmission(dto: CreateContactDto, clientIp?: string) {
     const timestamp = new Date().toISOString();
     const contactId = `contact_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    this.logger.log(`Received contact submission [ID: ${contactId}] from: ${dto.name} (${dto.email})`);
+    const emailKey = dto.email.toLowerCase().trim();
+    const ipKey = clientIp || '127.0.0.1';
+    const now = Date.now();
 
-    // 1. Send Email Notification
+    // Check if sender email or IP is in cooldown (submitted in last 5 minutes)
+    const lastEmailTime = this.cooldownMap.get(`email:${emailKey}`) || 0;
+    const lastIpTime = this.cooldownMap.get(`ip:${ipKey}`) || 0;
+
+    const isEmailInCooldown = now - lastEmailTime < this.COOLDOWN_MS;
+    const isIpInCooldown = now - lastIpTime < this.COOLDOWN_MS;
+
     let emailSent = false;
-    if (this.transporter) {
-      try {
-        const targetEmail = process.env.NOTIFICATION_EMAIL || 'vedrocks2000@gmail.com';
-        await this.transporter.sendMail({
-          from: `"Vedant Portfolio" <${dto.email}>`,
-          to: targetEmail,
-          subject: `⚡ Portfolio Contact: ${dto.subject} (from ${dto.name})`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px; border: 1px solid #333; background: #0b0f19; color: #fff; border-radius: 10px;">
-              <h2 style="color: #6366f1; border-bottom: 2px solid #6366f1; padding-bottom: 8px;">New Portfolio Contact</h2>
-              <p><strong>Name:</strong> ${dto.name}</p>
-              <p><strong>Email:</strong> <a href="mailto:${dto.email}" style="color: #38bdf8;">${dto.email}</a></p>
-              ${dto.company ? `<p><strong>Company:</strong> ${dto.company}</p>` : ''}
-              <p><strong>Subject:</strong> ${dto.subject}</p>
-              <div style="background: #1e293b; padding: 15px; border-radius: 6px; margin-top: 15px;">
-                <p style="margin: 0; white-space: pre-wrap;">${dto.message}</p>
-              </div>
-              <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">Sent at ${timestamp} • Client IP: ${clientIp || '127.0.0.1'}</p>
-            </div>
-          `,
-        });
-        emailSent = true;
-        this.logger.log(`Email notification sent to ${targetEmail}`);
-      } catch (err) {
-        this.logger.error('Failed to send email notification:', err);
-      }
-    }
-
-    // 2. Dispatch Webhook push alert
-    const webhookUrl = dto.webhookUrl || process.env.DISCORD_WEBHOOK_URL;
     let webhookSent = false;
+    const isSpamThrottled = isEmailInCooldown || isIpInCooldown;
 
-    if (webhookUrl) {
-      try {
-        await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: 'Portfolio Alert Bot',
-            embeds: [
-              {
-                title: `📩 New Contact Submission: ${dto.subject}`,
-                color: 0x6366f1,
-                fields: [
-                  { name: 'Name', value: dto.name, inline: true },
-                  { name: 'Email', value: dto.email, inline: true },
-                  { name: 'Company', value: dto.company || 'N/A', inline: true },
-                  { name: 'Message', value: dto.message },
-                ],
-                footer: { text: `ID: ${contactId} • ${timestamp}` },
-              },
-            ],
-          }),
-        });
-        webhookSent = true;
-        this.logger.log('Discord webhook push alert dispatched');
-      } catch (err) {
-        this.logger.error('Failed to dispatch webhook notification:', err);
+    if (isSpamThrottled) {
+      this.logger.warn(
+        `[SPAM GUARD] Rapid submission detected from email: ${dto.email} (IP: ${clientIp}). Notifications suppressed for 5 min cooldown.`,
+      );
+    } else {
+      // Record new submission timestamp for cooldown guard
+      this.cooldownMap.set(`email:${emailKey}`, now);
+      this.cooldownMap.set(`ip:${ipKey}`, now);
+
+      // 1. Send Email Notification
+      if (this.transporter) {
+        try {
+          const targetEmail = process.env.NOTIFICATION_EMAIL || 'vedrocks2000@gmail.com';
+          await this.transporter.sendMail({
+            from: `"Vedant Portfolio" <${dto.email}>`,
+            to: targetEmail,
+            subject: `⚡ Portfolio Contact: ${dto.subject} (from ${dto.name})`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px; border: 1px solid #333; background: #0b0f19; color: #fff; border-radius: 10px;">
+                <h2 style="color: #6366f1; border-bottom: 2px solid #6366f1; padding-bottom: 8px;">New Portfolio Contact</h2>
+                <p><strong>Name:</strong> ${dto.name}</p>
+                <p><strong>Email:</strong> <a href="mailto:${dto.email}" style="color: #38bdf8;">${dto.email}</a></p>
+                ${dto.company ? `<p><strong>Company:</strong> ${dto.company}</p>` : ''}
+                <p><strong>Subject:</strong> ${dto.subject}</p>
+                <div style="background: #1e293b; padding: 15px; border-radius: 6px; margin-top: 15px;">
+                  <p style="margin: 0; white-space: pre-wrap;">${dto.message}</p>
+                </div>
+                <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">Sent at ${timestamp} • Client IP: ${clientIp || '127.0.0.1'}</p>
+              </div>
+            `,
+          });
+          emailSent = true;
+          this.logger.log(`Email notification sent to ${targetEmail}`);
+        } catch (err) {
+          this.logger.error('Failed to send email notification:', err);
+        }
+      }
+
+      // 2. Dispatch Webhook push alert
+      const webhookUrl = dto.webhookUrl || process.env.DISCORD_WEBHOOK_URL;
+      if (webhookUrl) {
+        try {
+          await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: 'Portfolio Alert Bot',
+              embeds: [
+                {
+                  title: `📩 New Contact Submission: ${dto.subject}`,
+                  color: 0x6366f1,
+                  fields: [
+                    { name: 'Name', value: dto.name, inline: true },
+                    { name: 'Email', value: dto.email, inline: true },
+                    { name: 'Company', value: dto.company || 'N/A', inline: true },
+                    { name: 'Message', value: dto.message },
+                  ],
+                  footer: { text: `ID: ${contactId} • ${timestamp}` },
+                },
+              ],
+            }),
+          });
+          webhookSent = true;
+          this.logger.log('Discord webhook push alert dispatched');
+        } catch (err) {
+          this.logger.error('Failed to dispatch webhook notification:', err);
+        }
       }
     }
 
@@ -147,26 +172,30 @@ export class ContactService {
       ipAddress: clientIp || '127.0.0.1',
       emailNotificationSent: emailSent,
       webhookPushSent: webhookSent,
+      isSpamThrottled,
     };
 
     try {
       const existingLogs = this.getContactLogs();
       existingLogs.unshift(newRecord);
       fs.writeFileSync(this.dbFilePath, JSON.stringify(existingLogs, null, 2), 'utf-8');
-      this.logger.log(`Contact record [${contactId}] persisted to database logs.`);
+      this.logger.log(`Contact record [${contactId}] persisted to database logs (Spam Throttled: ${isSpamThrottled}).`);
     } catch (err) {
       this.logger.error('Failed to save record to database:', err);
     }
 
     return {
       success: true,
-      message: 'Thank you! Your message has been saved and sent successfully.',
+      message: isSpamThrottled
+        ? 'Thank you! Your message has been received and saved.'
+        : 'Thank you! Your message has been sent successfully.',
       details: {
         id: contactId,
         submittedAt: timestamp,
         savedToDatabase: true,
         emailNotificationSent: emailSent,
         webhookPushSent: webhookSent,
+        isSpamThrottled,
       },
     };
   }
