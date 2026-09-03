@@ -40,7 +40,7 @@ export default function AboutPage() {
               <span className="text-xs text-emerald-500/60 block font-mono">Location</span>
               <span className="text-sm font-semibold text-emerald-50 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                Bangalore / Jabalpur, India
+                Bengaluru, Karnataka, India
               </span>
             </div>
             <div className="space-y-1">

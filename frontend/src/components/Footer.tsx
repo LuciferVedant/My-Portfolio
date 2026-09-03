@@ -30,7 +30,7 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-2 text-xs text-emerald-400/70 font-mono pt-2">
             <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-            Jabalpur, M.P. • Bangalore, India
+            Bengaluru, Karnataka, India
           </div>
         </div>
 

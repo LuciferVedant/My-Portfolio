@@ -9,7 +9,7 @@ const experiences = [
     company: 'POSTQODE, ELEVENXN TECHNOLOGIES PVT LTD',
     role: 'Software Engineer',
     period: 'May 2025 – Present',
-    location: 'Bangalore, India',
+    location: 'Bengaluru, Karnataka, India',
     isCurrent: true,
     highlights: [
       'Contributed to the development of the PostQode Extension and its accompanying Web UI using React TypeScript (Redux-Toolkit) and Java (Spring Boot).',
@@ -22,7 +22,7 @@ const experiences = [
     company: 'PURPLEDOCS PVT LTD',
     role: 'Jr Frontend Developer',
     period: 'Sep 2024 – May 2025',
-    location: 'Jabalpur, India',
+    location: 'Bengaluru, Karnataka, India',
     isCurrent: false,
     highlights: [
       'Led the development of content management application (PurpleCMS) for UNMH Hospitals, successfully deployed on their enterprise servers.',
@@ -35,7 +35,7 @@ const experiences = [
     company: 'SECUREDAPP',
     role: 'Software Developer Intern',
     period: 'Dec 2023 – June 2024',
-    location: 'Jabalpur, India',
+    location: 'Bengaluru, Karnataka, India',
     isCurrent: false,
     highlights: [
       'Designed and implemented UI components like payment status pages and blog pages using React.js.',

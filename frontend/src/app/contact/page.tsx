@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Mail, Phone, MapPin, Bell, CheckCircle2, AlertCircle, Sparkles, ShieldAlert, Bot } from 'lucide-react';
+import { Send, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Terminal, Cpu } from 'lucide-react';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -11,7 +11,6 @@ export default function ContactPage() {
     subject: '',
     company: '',
     message: '',
-    webhookUrl: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +44,7 @@ export default function ContactPage() {
           message: data.message || 'Message delivered successfully!',
           details: data.details,
         });
-        setFormData({ name: '', email: '', subject: '', company: '', message: '', webhookUrl: '' });
+        setFormData({ name: '', email: '', subject: '', company: '', message: '' });
       } else {
         const errorMsg = Array.isArray(data.message) ? data.message.join(', ') : data.message || 'Failed to submit form.';
         setResponseState({
@@ -79,13 +78,13 @@ export default function ContactPage() {
           Get In <span className="text-gradient-teal">Touch</span>
         </h1>
         <p className="text-emerald-100/70 text-sm">
-          Send a direct message below. Submissions trigger instant email alerts to <strong className="text-emerald-400">vedrocks2000@gmail.com</strong> and optional Webhook push alerts via NestJS.
+          Send a direct message below. Submissions trigger instant email alerts to <strong className="text-emerald-400">vedrocks2000@gmail.com</strong> and push alerts via NestJS.
         </p>
       </motion.div>
 
       {/* Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Contact Info & Notification Explainer */}
+        {/* Contact Info & Live Code Inspector */}
         <div className="lg:col-span-5 space-y-6">
           <div className="glass-card p-6 rounded-md space-y-6">
             <h2 className="text-lg font-bold text-emerald-50 flex items-center gap-2">
@@ -124,39 +123,53 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <span className="text-emerald-600/60 block text-[11px] font-mono">Location</span>
-                  <span className="font-semibold text-emerald-50">Jabalpur, M.P. • Bangalore, India</span>
+                  <span className="font-semibold text-emerald-50">Bengaluru, Karnataka, India</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Notification System Explanation Card */}
-          <div className="glass-panel p-6 rounded-md space-y-4 border border-emerald-500/30">
-            <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs uppercase tracking-wider font-mono">
-              <Bell className="w-4 h-4 text-emerald-400" />
-              How You Get Notified
+          {/* Live Contact API Code Inspector */}
+          <div className="terminal-window rounded-md overflow-hidden shadow-2xl border border-emerald-500/30 bg-black/90">
+            <div className="terminal-topbar flex items-center justify-between px-3 py-2 bg-black/80 border-b border-emerald-500/20">
+              <div className="flex items-center gap-2">
+                <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-[10px] font-mono tracking-widest text-emerald-300 uppercase">
+                  contact_pipeline.ts — nestjs
+                </span>
+              </div>
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                POST /api/contact
+              </span>
             </div>
 
-            <div className="space-y-3 text-xs text-emerald-100/70">
-              <div className="p-3 rounded-sm bg-black/70 border border-emerald-500/15 space-y-1">
-                <span className="font-bold text-emerald-50 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  1. Nodemailer SMTP / Resend Email
-                </span>
-                <p className="text-emerald-500/60 leading-relaxed text-[11px]">
-                  NestJS formats an HTML email with visitor details and sends it straight to your inbox.
-                </p>
-              </div>
+            <div className="p-4 font-mono text-[11px] leading-relaxed text-emerald-100/90 overflow-x-auto">
+              <pre className="whitespace-pre">
+                <code>{`// NestJS Contact & Multi-Channel Pipeline
+@Injectable()
+export class ContactService {
+  async handleContact(dto: CreateContactDto) {
+    // 1. Send Email Notification
+    await this.mailer.sendMail({
+      to: 'vedrocks2000@gmail.com',
+      subject: dto.subject,
+      body: dto.message,
+    });
+    // 2. Dispatch Push Alert Webhook
+    await this.webhook.dispatchEmbed(dto);
+    // 3. Persist to DB Log
+    await this.db.saveRecord(dto);
+  }
+}`}</code>
+              </pre>
+            </div>
 
-              <div className="p-3 rounded-sm bg-black/70 border border-emerald-500/15 space-y-1">
-                <span className="font-bold text-emerald-50 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  2. Discord / Telegram Webhook Push
-                </span>
-                <p className="text-emerald-500/60 leading-relaxed text-[11px]">
-                  Dispatches a formatted rich embed message to your phone or desktop chat immediately.
-                </p>
-              </div>
+            <div className="px-3 py-1.5 bg-black border-t border-emerald-500/15 flex items-center justify-between text-[10px] font-mono text-emerald-500/60">
+
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                NESTJS API ACTIVE
+              </span>
             </div>
           </div>
         </div>
@@ -174,8 +187,8 @@ export default function ContactPage() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={`p-4 rounded-sm text-xs space-y-1 ${responseState.success
-                    ? 'bg-emerald-950/60 border border-emerald-800 text-emerald-300'
-                    : 'bg-rose-950/60 border border-rose-800 text-rose-300'
+                  ? 'bg-emerald-950/60 border border-emerald-800 text-emerald-300'
+                  : 'bg-rose-950/60 border border-rose-800 text-rose-300'
                   }`}
               >
                 <div className="flex items-center gap-2 font-bold text-sm">
@@ -262,21 +275,6 @@ export default function ContactPage() {
               />
             </div>
 
-            {/* Optional Discord Webhook Test URL */}
-            <div className="space-y-1.5 pt-2 border-t border-emerald-500/15">
-              <label className="text-[11px] text-emerald-500/60 font-mono flex items-center gap-1">
-                <span>Custom Webhook Push URL (Optional for testing instant push alert)</span>
-              </label>
-              <input
-                type="url"
-                name="webhookUrl"
-                value={formData.webhookUrl}
-                onChange={handleChange}
-                placeholder="https://discord.com/api/webhooks/..."
-                className="w-full bg-black/60 border border-emerald-500/15 rounded-sm px-4 py-2 text-[11px] text-emerald-100/70 placeholder-emerald-700/50 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
-              />
-            </div>
-
             <button
               type="submit"
               disabled={isSubmitting}
@@ -290,7 +288,7 @@ export default function ContactPage() {
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  submit &amp; trigger_notification
+                  submit
                 </>
               )}
             </button>

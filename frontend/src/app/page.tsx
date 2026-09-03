@@ -3,21 +3,20 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { HeroCanvas } from '@/components/3d/HeroCanvas';
+import { TerminalCodeInspector } from '@/components/TerminalCodeInspector';
 import {
   ArrowRight,
   Code,
   Layers,
   Zap,
   Github,
-  Terminal,
   ShieldCheck,
 } from 'lucide-react';
 
 export default function HomePage() {
   return (
     <div className="max-w-6xl mx-auto px-6 space-y-24 pb-12">
-      {/* HERO SECTION WITH 3D CANVAS */}
+      {/* HERO SECTION WITH TERMINAL CODE INSPECTOR */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-4">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -91,16 +90,15 @@ export default function HomePage() {
           </div>
         </motion.div>
 
-        {/* 3D CANVAS SHOWCASE */}
+        {/* LIVE TERMINAL CODE INSPECTOR */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           className="lg:col-span-5 flex justify-center items-center"
         >
-          <div className="w-full relative terminal-window rounded-md overflow-hidden shadow-2xl">
-            <div className="terminal-topbar pl-16">hero_render.canvas — three.js</div>
-            <HeroCanvas />
+          <div className="w-full">
+            <TerminalCodeInspector />
           </div>
         </motion.div>
       </section>

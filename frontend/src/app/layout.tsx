@@ -28,7 +28,9 @@ export const metadata: Metadata = {
     'Spring Boot',
     'Next.js',
     'NestJS',
-    'Bangalore',
+    'Bengaluru',
+    'Karnataka',
+    'India',
   ],
 };
 
