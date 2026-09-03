@@ -1,35 +1,36 @@
-# 🚀 Vedant Khatri — 3D Full-Stack Developer Portfolio
+# 🚀 Vedant Khatri — Enterprise Full-Stack Developer Portfolio
 
-An enterprise-grade, high-performance portfolio application for **Vedant Khatri** (Software Engineer, 2+ Years Experience) featuring an interactive **Three.js 3D Canvas**, **Apple-inspired dark glassmorphism UI**, and an interactive **3D AI Recruiter Assistant**. 
+An enterprise-grade, high-performance portfolio application for **Vedant Khatri** (Software Engineer, 2+ Years Experience) featuring a **Matrix-inspired terminal UI aesthetic**, an interactive **Terminal Code Inspector**, and a NestJS-powered **AI Career Assistant** with strict resume guardrails.
 
 The repository is built with a clean full-stack architecture split into two independent services:
-- **`frontend/`**: Built with Next.js (App Router), TypeScript, Tailwind CSS, Framer Motion, and React Three Fiber / Three.js.
-- **`backend/`**: Built with NestJS, TypeScript, Class Validator, Nodemailer, Rate Limiting, and persistent database contact logging.
+- **`frontend/`**: Built with Next.js (App Router), TypeScript, Tailwind CSS, Framer Motion, and Lucide React.
+- **`backend/`**: Built with NestJS, TypeScript, OpenRouter / LLM integration, Class Validator, Nodemailer, Rate Limiting, 5-minute Anti-Spam Cooldown, and persistent database logging.
 
 ---
 
 ## 🌟 Key Features & Highlights
 
-- **🎨 Apple-Style 3D Visual Experience**:
-  - Interactive custom 3D mesh sphere canvas with floating orbital rings, particle starfields, and real-time mouse-tracking distortion.
-  - Dark glassmorphism panels, radial neon ambient glows, micro-interactions, and smooth momentum scrolling.
+- **🎨 Matrix Terminal & Dark Glassmorphism UI**:
+  - Custom Matrix rain background canvas, CRT scanline sweeps, dark glassmorphism panels, and neon emerald glows.
+  - **Terminal Code Inspector**: Interactive tabbed code inspector displaying real production code (Go SSE queue algorithm for Thakur Dental Clinic, NestJS contact pipeline, and TypeScript report generator for PostQode).
 
-- **🤖 3D AI Recruiter Assistant Bot**:
-  - Interactive floating chat drawer connected directly to the NestJS backend (`POST /api/ai/chat`).
-  - Recruiters can ask questions like *"What did Vedant build at PostQode?"* or *"What is Vedant's tech stack?"* to receive real-time AI answers 24/7.
+- **🤖 AI Career Assistant & OpenRouter LLM Guardrail Engine**:
+  - Powered by OpenRouter / LLM models (e.g., `openai/gpt-4o-mini`, `anthropic/claude-3.5-sonnet`, `meta-llama/llama-3.3-70b-instruct`).
+  - **Strict Resume Guardrails**: Seeded with Vedant's complete professional experience, tech stack (React, Go, Java Spring Boot, NestJS), and projects. Off-topic questions are strictly declined.
 
 - **🔔 Contact & Multi-Channel Notification Engine**:
   - **Email Notification**: Direct HTML email notification dispatched to `vedrocks2000@gmail.com` via Nodemailer / SMTP.
-  - **Discord / Telegram Push Alert**: Real-time push notification webhook alerts dispatched directly to your mobile/desktop.
+  - **Discord / Telegram Webhook Push Alert**: Real-time push notification alerts dispatched directly to your mobile or desktop chat.
+  - **Anti-Spam & Cooldown Protection**: 5-minute memory cooldown per sender/IP and NestJS Throttler rate limiting (10 req/min) to prevent inbox flooding.
   - **Persistent Database Logs**: All contact submissions (`name`, `email`, `subject`, `company`, `message`, `ipAddress`, `submittedAt`) are logged to local persistent database storage (`backend/data/contacts-db.json`) and viewable via `GET /api/contact/logs`.
 
 - **🧭 Dedicated Page Routing**:
-  - `/` — **Home & Hero**: Interactive 3D Canvas, executive summary, core capabilities, key metrics.
+  - `/` — **Home & Hero**: Live Terminal Code Inspector, executive summary, core capabilities, key stats.
   - `/about` — **About Vedant**: Career overview, B.Tech ECE degree from SATI Vidisha, Coding Ninjas certifications.
-  - `/experience` — **Work History**: Interactive timeline for PostQode (Software Engineer), Purpledocs (UNMH Hospital CMS & EMRD 2.0), and SecuredApp.
-  - `/projects` — **Software Showcase**: Thakur Dental Clinic (Full-stack queueing algorithm with SSE delay alerts in Go & PostgreSQL), Qodeflow, and PurpleCMS.
+  - `/experience` — **Work History**: Interactive career timeline for PostQode (Software Engineer), Purpledocs (UNMH Hospital CMS & EMRD 2.0), and SecuredApp.
+  - `/projects` — **Software Showcase**: Thakur Dental Clinic (Full-stack queueing algorithm with SSE delay alerts in Go & PostgreSQL), Qodeflow, and PostQode Extension.
   - `/skills` — **Technical Competencies Matrix**: Categorized interactive cards for Programming Languages, Frameworks, and Tools/Platforms.
-  - `/contact` — **Contact & Connect**: Direct form connected live to NestJS API with status feedback & Webhook alert testing.
+  - `/contact` — **Contact & Connect**: Direct form connected live to NestJS API with status feedback & Live Contact Pipeline Code Inspector.
 
 ---
 
@@ -41,10 +42,10 @@ My-Portfolio/
 │   ├── data/
 │   │   └── contacts-db.json        # Local persistent database store for contact submission logs
 │   ├── src/
-│   │   ├── contact/                # POST /api/contact & GET /api/contact/logs (Email + Webhook + DB)
+│   │   ├── contact/                # POST /api/contact & GET /api/contact/logs (Email + Webhook + DB + Spam Guard)
 │   │   ├── projects/               # GET /api/projects & GET /api/projects/:id
 │   │   ├── experience/             # GET /api/experience
-│   │   ├── ai-assistant/           # POST /api/ai/chat (Resume AI Q&A)
+│   │   ├── ai-assistant/           # POST /api/ai/chat (OpenRouter LLM + Resume Guardrails)
 │   │   ├── analytics/              # POST /api/analytics/track & GET /api/analytics/stats
 │   │   ├── health/                 # GET /api/health (Uptime & status)
 │   │   ├── app.module.ts
@@ -61,13 +62,14 @@ My-Portfolio/
 │   │   │   ├── projects/page.tsx   # Projects showcase route
 │   │   │   ├── skills/page.tsx     # Technical matrix route
 │   │   │   ├── contact/page.tsx    # Contact route
-│   │   │   ├── globals.css         # Glassmorphism & design system tokens
+│   │   │   ├── globals.css         # Design system tokens & matrix animations
 │   │   │   └── layout.tsx
 │   │   └── components/
-│   │       ├── 3d/HeroCanvas.tsx   # Three.js / React Three Fiber interactive 3D Mesh
-│   │       ├── Navbar.tsx         # Active route pill navigation
+│   │       ├── TerminalCodeInspector.tsx # Interactive code tab inspector
+│   │       ├── MatrixRain.tsx     # Canvas matrix rain effect
+│   │       ├── Navbar.tsx         # Active route navigation
 │   │       ├── Footer.tsx         # Footer with social links & NestJS API ping
-│   │       └── AiChatWidget.tsx   # 3D AI Recruiter Assistant drawer
+│   │       └── AiChatWidget.tsx   # AI Career Assistant chat drawer
 │   ├── package.json
 │   └── tsconfig.json
 │
@@ -110,9 +112,9 @@ cd My-Portfolio
    ```bash
    cp .env.example .env
    ```
-   *If `.env` is omitted, NestJS will run gracefully with console logging and database saving enabled.*
+   *Add `OPENROUTER_API_KEY`, `AI_MODEL`, `SMTP_USER`, `SMTP_PASS`, or `DISCORD_WEBHOOK_URL` to enable live LLM models, email alerts, or push webhooks.*
 
-4. Build and Start the NestJS Server in Development Mode:
+4. Start the NestJS Server in Development Mode:
    ```bash
    npm run start:dev
    ```
@@ -146,9 +148,9 @@ cd My-Portfolio
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/api/contact` | Validates & logs contact submission to DB, triggers Email & Webhook alerts |
+| `POST` | `/api/contact` | Validates & logs contact submission to DB, triggers Email & Webhook alerts with 5-min spam cooldown |
 | `GET` | `/api/contact/logs` | Retrieves persistent contact submission logs from DB |
-| `POST` | `/api/ai/chat` | AI Assistant query endpoint for resume Q&A |
+| `POST` | `/api/ai/chat` | AI Assistant endpoint powered by OpenRouter LLM with strict resume guardrails |
 | `GET` | `/api/projects` | Returns all software projects (filterable with `?tech=golang`) |
 | `GET` | `/api/projects/:id` | Returns detailed project breakdown |
 | `GET` | `/api/experience` | Returns work experience timeline |
@@ -158,10 +160,11 @@ cd My-Portfolio
 
 ---
 
-## 🛡️ Security & Best Practices
+## 🛡️ Security & Anti-Spam Best Practices
 
-- **Rate Limiting**: Protected with `@nestjs/throttler` (max 10 requests/min for contact form).
-- **Validation Pipe**: Enforced with `class-validator` and `class-transformer` for strict payload checking.
+- **5-Minute Anti-Spam Cooldown**: Suppresses duplicate email & webhook dispatches from the same email or IP within 5 minutes.
+- **Rate Limiting**: Protected with `@nestjs/throttler` (max 10 requests/min per IP).
+- **Validation Pipe**: Enforced with `class-validator` and `class-transformer` for payload validation.
 - **CORS**: Configured in NestJS `main.ts` to allow cross-origin requests from Next.js.
 
 ---
@@ -172,5 +175,5 @@ cd My-Portfolio
 *Full Stack Developer / Software Engineer*  
 - **Email**: [vedrocks2000@gmail.com](mailto:vedrocks2000@gmail.com)  
 - **Phone**: +91 8349443633  
-- **Location**: Jabalpur, M.P. • Bangalore, India  
+- **Location**: Bengaluru, Karnataka, India  
 - **GitHub**: [github.com/vedrocks2000](https://github.com/vedrocks2000)  
