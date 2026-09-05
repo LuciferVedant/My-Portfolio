@@ -63,7 +63,7 @@ export default function HomePage() {
             </Link>
 
             <a
-              href="https://github.com/vedrocks2000"
+              href="https://github.com/LuciferVedant"
               target="_blank"
               rel="noreferrer"
               className="p-3.5 rounded-sm glass-panel hover:border-emerald-400/60 text-emerald-400 hover:text-emerald-300 transition-all"

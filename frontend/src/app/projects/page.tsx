@@ -203,7 +203,7 @@ export default function ProjectsPage() {
 
                 <div className="flex items-center justify-between text-xs text-emerald-500/60 font-mono pt-1">
                   <a
-                    href="https://github.com/vedrocks2000"
+                    href="https://github.com/LuciferVedant"
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-1.5 hover:text-emerald-50 transition-colors"

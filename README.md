@@ -26,11 +26,21 @@ The repository is built with a clean full-stack architecture split into two inde
 
 - **🧭 Dedicated Page Routing**:
   - `/` — **Home & Hero**: Live Terminal Code Inspector, executive summary, core capabilities, key stats.
-  - `/about` — **About Vedant**: Career overview, B.Tech ECE degree from SATI Vidisha, Coding Ninjas certifications.
+  - `/about` — **About Vedant**: Career overview, B.Tech ECE degree from SATI Vidisha, Coding Ninjas verified certifications.
   - `/experience` — **Work History**: Interactive career timeline for PostQode (Software Engineer), Purpledocs (UNMH Hospital CMS & EMRD 2.0), and SecuredApp.
   - `/projects` — **Software Showcase**: Thakur Dental Clinic (Full-stack queueing algorithm with SSE delay alerts in Go & PostgreSQL), Qodeflow, and PostQode Extension.
   - `/skills` — **Technical Competencies Matrix**: Categorized interactive cards for Programming Languages, Frameworks, and Tools/Platforms.
   - `/contact` — **Contact & Connect**: Direct form connected live to NestJS API with status feedback & Live Contact Pipeline Code Inspector.
+
+---
+
+## 📜 Verified Certifications & Credentials
+
+- 📜 **Introduction to C++**: [Verify Certificate](https://drive.google.com/file/d/1u7U9fRo7G7wlnrBd-yqsSoAjoRMpwq7N/view) *(Coding Ninjas)*
+- 📜 **Data Structures & Algorithms in C++**: [Verify Certificate](https://drive.google.com/file/d/1rL76h3CdbvD0LGzEWAENZgRpCzoW-UpY/view) *(Coding Ninjas)*
+- 📜 **Frontend Web Development**: [Verify Certificate](https://drive.google.com/file/d/12e9Otb8vjFmYw5TFDFB3tiLDmpmxQ911/view) *(Coding Ninjas)*
+- 📜 **Advance Frontend Development**: [Verify Certificate](https://drive.google.com/file/d/1I-UzxF1jl6YSxFvkMEG6gcODTyV1qNbY/view) *(Coding Ninjas)*
+- 📜 **Backend Development Architecture**: [Verify Certificate](https://drive.google.com/file/d/1AfTfQJOayswoLVr3ppr1zsBZUP4DGc0Z/view) *(Coding Ninjas)*
 
 ---
 
@@ -89,7 +99,7 @@ My-Portfolio/
 
 ### 1. Clone & Setup Repository
 ```bash
-git clone https://github.com/vedrocks2000/My-Portfolio.git
+git clone https://github.com/LuciferVedant/My-Portfolio.git
 cd My-Portfolio
 ```
 
@@ -176,4 +186,4 @@ cd My-Portfolio
 - **Email**: [vedrocks2000@gmail.com](mailto:vedrocks2000@gmail.com)  
 - **Phone**: +91 8349443633  
 - **Location**: Bengaluru, Karnataka, India  
-- **GitHub**: [github.com/vedrocks2000](https://github.com/vedrocks2000)  
+- **GitHub**: [github.com/LuciferVedant](https://github.com/LuciferVedant)  

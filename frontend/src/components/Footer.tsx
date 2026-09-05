@@ -91,7 +91,7 @@ export function Footer() {
 
             <div className="pt-3 flex items-center gap-3">
               <a
-                href="https://github.com/vedrocks2000"
+                href="https://github.com/LuciferVedant"
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-sm bg-black border border-emerald-500/20 flex items-center justify-center text-emerald-400/70 hover:text-emerald-300 hover:border-emerald-400/60 hover:shadow-[0_0_12px_rgba(0,255,102,0.35)] transition-all"
@@ -99,7 +99,7 @@ export function Footer() {
                 <Github className="w-4 h-4" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/in/vedant-khatri-b706241a0/"
                 target="_blank"
                 rel="noreferrer"
                 className="w-8 h-8 rounded-sm bg-black border border-emerald-500/20 flex items-center justify-center text-emerald-400/70 hover:text-emerald-300 hover:border-emerald-400/60 hover:shadow-[0_0_12px_rgba(0,255,102,0.35)] transition-all"
