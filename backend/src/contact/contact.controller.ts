@@ -16,8 +16,8 @@ export class ContactController {
   }
 
   @Get('logs')
-  getLogs(): { total: number; logs: ContactLog[] } {
-    const logs = this.contactService.getContactLogs();
+  async getLogs(): Promise<{ total: number; logs: ContactLog[] }> {
+    const logs = await this.contactService.getContactLogs();
     return {
       total: logs.length,
       logs,

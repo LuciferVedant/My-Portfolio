@@ -58,9 +58,14 @@ VEDANT KHATRI'S PROFILE & RESUME KNOWLEDGE BASE:
 - Key Projects:
   * Thakur Dental Clinic: Full-stack clinic queue management system with dynamic overrun algorithm & real-time SSE delay alerts in Go, PostgreSQL, React, Docker.
   * Qodeflow: AI Agent developer workflow automation engine in Go, Fastify, React.
-- Education & Certifications:
+- Education & Verified Certifications:
   * B.Tech in Electronics & Communication Engineering from Samrat Ashok Technological Institute (SATI), Vidisha M.P. (2019-2023).
-  * Coding Ninjas Certified in DSA in C++, Full Stack Web Dev, Advance Frontend Dev, Backend Architecture.
+  * Coding Ninjas Certifications:
+    1. Introduction to C++: https://drive.google.com/file/d/1u7U9fRo7G7wlnrBd-yqsSoAjoRMpwq7N/view
+    2. Data Structures & Algorithms in C++: https://drive.google.com/file/d/1rL76h3CdbvD0LGzEWAENZgRpCzoW-UpY/view
+    3. Frontend Web Development: https://drive.google.com/file/d/12e9Otb8vjFmYw5TFDFB3tiLDmpmxQ911/view
+    4. Advance Frontend Development: https://drive.google.com/file/d/1I-UzxF1jl6YSxFvkMEG6gcODTyV1qNbY/view
+    5. Backend Development Architecture: https://drive.google.com/file/d/1AfTfQJOayswoLVr3ppr1zsBZUP4DGc0Z/view
 
 STRICT GUARDRAIL RULES:
 1. IF the question is related to Vedant Khatri (skills, work history, projects, tech stack, education, contact info, hiring, etc.), answer concisely, professionally, and accurately using the knowledge base above.
@@ -72,6 +77,7 @@ STRICT GUARDRAIL RULES:
 
   async processUserQuery(query: string): Promise<AiChatResponse> {
     const openRouterApiKey = process.env.OPENROUTER_API_KEY;
+    const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     const openAiApiKey = process.env.OPENAI_API_KEY;
     const model = process.env.AI_MODEL || 'openai/gpt-4o-mini';
 
@@ -112,7 +118,54 @@ STRICT GUARDRAIL RULES:
       }
     }
 
-    // 2. If OpenAI API Key is provided
+    // 2. If Gemini API Key is provided (direct Google Gemini API call)
+    if (geminiApiKey) {
+      try {
+        let gModel = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+        if (model.toLowerCase().includes('gemini')) {
+          gModel = model.includes('/') ? model.split('/')[1] : model;
+        }
+        this.logger.log(`Dispatching query to Google Gemini API using model: ${gModel}`);
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${gModel}:generateContent?key=${geminiApiKey}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              system_instruction: {
+                parts: [{ text: this.buildSystemPrompt() }],
+              },
+              contents: [
+                {
+                  parts: [{ text: query }],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.2,
+              },
+            }),
+          },
+        );
+
+        const data = await response.json();
+        const responseText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (responseText) {
+          const answer = responseText.trim();
+          const isBlocked = answer.includes("exclusively to answer questions about Vedant Khatri");
+          return {
+            answer,
+            relevantSkills: isBlocked ? [] : this.extractRelevantSkills(query),
+            isGuardrailBlocked: isBlocked,
+          };
+        }
+      } catch (err) {
+        this.logger.error('Google Gemini API call failed:', err);
+      }
+    }
+
+    // 3. If OpenAI API Key is provided
     if (openAiApiKey) {
       try {
         this.logger.log(`Dispatching query to OpenAI API using model: ${model}`);

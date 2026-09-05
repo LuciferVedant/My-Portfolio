@@ -43,7 +43,7 @@ export class ProjectsService {
         'Docker',
         'Tailwind CSS',
       ],
-      githubUrl: 'https://github.com/vedrocks2000',
+      githubUrl: 'https://github.com/LuciferVedant',
       featured: true,
     },
     {
