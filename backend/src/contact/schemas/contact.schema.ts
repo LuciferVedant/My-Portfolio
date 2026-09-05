@@ -32,6 +32,15 @@ export class Contact {
   @Prop({ default: false })
   isSpamThrottled: boolean;
 
+  @Prop({ type: Array, default: [] })
+  attachments?: Array<{
+    filename: string;
+    contentType?: string;
+    sizeBytes?: number;
+    gridFsId?: string; // MongoDB GridFS File ObjectId
+    downloadUrl?: string;
+  }>;
+
   @Prop({ default: Date.now })
   submittedAt: Date;
 }

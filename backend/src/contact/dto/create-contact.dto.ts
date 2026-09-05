@@ -1,5 +1,12 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 
+export interface AttachmentDto {
+  filename: string;
+  content: string; // Base64 encoded file content
+  contentType?: string;
+  sizeBytes?: number;
+}
+
 export class CreateContactDto {
   @IsString()
   @IsNotEmpty({ message: 'Name is required' })
@@ -23,4 +30,7 @@ export class CreateContactDto {
   @IsOptional()
   @IsString()
   webhookUrl?: string; // Optional custom Discord / Telegram webhook to dispatch alert
+
+  @IsOptional()
+  attachments?: AttachmentDto[];
 }

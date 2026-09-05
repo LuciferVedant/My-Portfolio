@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Post, HttpCode, HttpStatus, UsePipes, ValidationPipe, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, HttpCode, HttpStatus, UsePipes, ValidationPipe, Req, Param, Res } from '@nestjs/common';
 import { ContactService, ContactLog } from './contact.service';
 import { CreateContactDto } from './dto/create-contact.dto';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @Controller('api/contact')
 export class ContactController {
@@ -22,5 +22,19 @@ export class ContactController {
       total: logs.length,
       logs,
     };
+  }
+
+  @Get('attachment/:fileId')
+  async downloadAttachment(@Param('fileId') fileId: string, @Res() res: Response) {
+    const downloadStream = this.contactService.getAttachmentStream(fileId);
+    if (!downloadStream) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: 'Attachment file not found in MongoDB GridFS' });
+    }
+    downloadStream.on('error', () => {
+      if (!res.headersSent) {
+        res.status(HttpStatus.NOT_FOUND).json({ message: 'Attachment stream error' });
+      }
+    });
+    downloadStream.pipe(res);
   }
 }

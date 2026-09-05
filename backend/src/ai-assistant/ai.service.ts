@@ -104,7 +104,7 @@ STRICT GUARDRAIL RULES:
 `;
   }
 
-  async processUserQuery(query: string): Promise<AiChatResponse> {
+  async processUserQuery(query: string, incomingAttachments?: any[]): Promise<AiChatResponse> {
     const openRouterApiKey = process.env.OPENROUTER_API_KEY;
     const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     const openAiApiKey = process.env.OPENAI_API_KEY;
@@ -144,7 +144,7 @@ STRICT GUARDRAIL RULES:
           if (messageObj?.tool_calls && messageObj.tool_calls.length > 0) {
             const toolCall = messageObj.tool_calls[0];
             if (toolCall.function?.name === 'submit_contact_form') {
-              return this.executeContactFormTool(toolCall.function.arguments);
+              return this.executeContactFormTool(toolCall.function.arguments, incomingAttachments);
             }
           }
 
@@ -238,7 +238,7 @@ STRICT GUARDRAIL RULES:
         if (messageObj?.tool_calls && messageObj.tool_calls.length > 0) {
           const toolCall = messageObj.tool_calls[0];
           if (toolCall.function?.name === 'submit_contact_form') {
-            return this.executeContactFormTool(toolCall.function.arguments);
+            return this.executeContactFormTool(toolCall.function.arguments, incomingAttachments);
           }
         }
 
@@ -260,7 +260,7 @@ STRICT GUARDRAIL RULES:
     return this.processLocalGuardrail(query);
   }
 
-  private async executeContactFormTool(argsJson: string | object): Promise<AiChatResponse> {
+  private async executeContactFormTool(argsJson: string | object, incomingAttachments?: any[]): Promise<AiChatResponse> {
     try {
       const args = typeof argsJson === 'string' ? JSON.parse(argsJson) : argsJson;
       const name = args.name || 'Website Visitor';
@@ -269,16 +269,19 @@ STRICT GUARDRAIL RULES:
       const message = args.message || 'No message provided';
       const company = args.company || '';
 
+      const attachmentsToPass = incomingAttachments || args.attachments || undefined;
+
       const submission = await this.contactService.handleContactSubmission({
         name,
         email,
         subject,
         message,
         company,
+        attachments: attachmentsToPass,
       });
 
       return {
-        answer: `✅ **Contact Form Submitted Successfully!**\n\nI have submitted your message directly to Vedant Khatri's email and stored the record in MongoDB.\n\n**Details Delivered:**\n- **Name:** ${name}\n- **Email:** ${email}\n- **Subject:** ${subject}\n- **Message:** ${message}${company ? `\n- **Company:** ${company}` : ''}`,
+        answer: `✅ **Contact Form Submitted Successfully!**\n\nI have submitted your message directly to Vedant Khatri's email and stored the record in MongoDB.\n\n**Details Delivered:**\n- **Name:** ${name}\n- **Email:** ${email}\n- **Subject:** ${subject}\n- **Message:** ${message}${company ? `\n- **Company:** ${company}` : ''}${attachmentsToPass && attachmentsToPass.length > 0 ? `\n- **Attachments (${attachmentsToPass.length}):** ${attachmentsToPass.map((a: any) => a.filename).join(', ')}` : ''}`,
         relevantSkills: ['Contact Form Tool', 'Resend API', 'MongoDB'],
         contactFormSubmitted: true,
         contactDetails: { name, email, subject, message, company, id: submission.details?.id },

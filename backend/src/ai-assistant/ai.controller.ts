@@ -7,10 +7,10 @@ export class AiController {
 
   @Post('chat')
   @HttpCode(HttpStatus.OK)
-  async chatWithAi(@Body('query') query: string) {
+  async chatWithAi(@Body('query') query: string, @Body('attachments') attachments?: any[]) {
     if (!query || typeof query !== 'string') {
       return { answer: 'Please provide a valid question about Vedant Khatri.', relevantSkills: [] };
     }
-    return this.aiService.processUserQuery(query);
+    return this.aiService.processUserQuery(query, attachments);
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as mongoose from 'mongoose';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { Contact, ContactDocument } from './schemas/contact.schema';
 import * as nodemailer from 'nodemailer';
@@ -30,6 +31,49 @@ export class ContactService {
   // Cooldown map to prevent duplicate emails from the same IP or Email (5 minutes cooldown)
   private readonly cooldownMap = new Map<string, number>();
   private readonly COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+
+  // Save base64 file to MongoDB GridFS Bucket
+  async saveFileToGridFS(filename: string, base64Content: string): Promise<string | null> {
+    if (!this.contactModel || !this.contactModel.db) return null;
+    try {
+      const db = this.contactModel.db.db;
+      const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'fs' });
+      const cleanBase64 = base64Content.includes('base64,')
+        ? base64Content.split('base64,')[1]
+        : base64Content;
+      const buffer = Buffer.from(cleanBase64, 'base64');
+
+      return new Promise((resolve) => {
+        const uploadStream = bucket.openUploadStream(filename);
+        uploadStream.on('finish', () => {
+          this.logger.log(`GridFS file saved: ${filename} (ID: ${uploadStream.id.toString()})`);
+          resolve(uploadStream.id.toString());
+        });
+        uploadStream.on('error', (err) => {
+          this.logger.error(`Failed uploading file ${filename} to GridFS:`, err);
+          resolve(null);
+        });
+        uploadStream.end(buffer);
+      });
+    } catch (err) {
+      this.logger.error('GridFS Bucket upload error:', err);
+      return null;
+    }
+  }
+
+  // Get GridFS download stream for file ID
+  getAttachmentStream(fileId: string) {
+    if (!this.contactModel || !this.contactModel.db) return null;
+    try {
+      const db = this.contactModel.db.db;
+      const bucket = new mongoose.mongo.GridFSBucket(db, { bucketName: 'fs' });
+      const objectId = new mongoose.Types.ObjectId(fileId);
+      return bucket.openDownloadStream(objectId);
+    } catch (err) {
+      this.logger.error(`Failed creating GridFS download stream for file ${fileId}:`, err);
+      return null;
+    }
+  }
 
   constructor(
     @Optional()
@@ -131,6 +175,16 @@ export class ContactService {
 
       // 1. Send Email Notification (Resend API or Nodemailer SMTP)
       const resendApiKey = process.env.RESEND_API_KEY;
+      const formattedAttachments = dto.attachments?.map((att) => {
+        const cleanBase64 = att.content.includes('base64,')
+          ? att.content.split('base64,')[1]
+          : att.content;
+        return {
+          filename: att.filename,
+          content: cleanBase64,
+        };
+      });
+
       if (resendApiKey) {
         try {
           const targetEmail = process.env.NOTIFICATION_EMAIL || 'vedrocks2000@gmail.com';
@@ -156,15 +210,21 @@ export class ContactService {
                   <div style="background: #1e293b; padding: 15px; border-radius: 6px; margin-top: 15px;">
                     <p style="margin: 0; white-space: pre-wrap;">${dto.message}</p>
                   </div>
+                  ${
+                    dto.attachments && dto.attachments.length > 0
+                      ? `<p><strong>Attached Files (${dto.attachments.length}):</strong> ${dto.attachments.map((a) => a.filename).join(', ')}</p>`
+                      : ''
+                  }
                   <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">Sent at ${timestamp} • Client IP: ${clientIp || '127.0.0.1'}</p>
                 </div>
               `,
+              attachments: formattedAttachments && formattedAttachments.length > 0 ? formattedAttachments : undefined,
             }),
           });
 
           if (res.ok) {
             emailSent = true;
-            this.logger.log(`Resend API email notification sent to ${targetEmail}`);
+            this.logger.log(`Resend API email notification sent to ${targetEmail} (Attachments: ${dto.attachments?.length || 0})`);
           } else {
             const errData = await res.json();
             this.logger.error('Resend API call failed:', errData);
@@ -218,6 +278,7 @@ export class ContactService {
                     { name: 'Email', value: dto.email, inline: true },
                     { name: 'Company', value: dto.company || 'N/A', inline: true },
                     { name: 'Message', value: dto.message },
+                    { name: 'Attachments', value: dto.attachments?.map((a) => a.filename).join(', ') || 'None' },
                   ],
                   footer: { text: `ID: ${contactId} • ${timestamp}` },
                 },
@@ -229,6 +290,21 @@ export class ContactService {
         } catch (err) {
           this.logger.error('Failed to dispatch webhook notification:', err);
         }
+      }
+    }
+
+    // Process attachments for MongoDB GridFS
+    const savedAttachmentMeta: Array<{ filename: string; contentType?: string; sizeBytes?: number; gridFsId?: string; downloadUrl?: string }> = [];
+    if (dto.attachments && dto.attachments.length > 0) {
+      for (const att of dto.attachments) {
+        const gridFsId = await this.saveFileToGridFS(att.filename, att.content);
+        savedAttachmentMeta.push({
+          filename: att.filename,
+          contentType: att.contentType,
+          sizeBytes: att.sizeBytes,
+          gridFsId: gridFsId || undefined,
+          downloadUrl: gridFsId ? `http://localhost:5001/api/contact/attachment/${gridFsId}` : undefined,
+        });
       }
     }
 
@@ -245,10 +321,11 @@ export class ContactService {
           emailNotificationSent: emailSent,
           webhookPushSent: webhookSent,
           isSpamThrottled,
+          attachments: savedAttachmentMeta,
           submittedAt: new Date(),
         });
         await mongoRecord.save();
-        this.logger.log(`Contact record persisted to MongoDB collection [contacts].`);
+        this.logger.log(`Contact record persisted to MongoDB collection [contacts] with ${savedAttachmentMeta.length} attachment records.`);
       } catch (err) {
         this.logger.warn('Failed to persist contact record to MongoDB:', err);
       }

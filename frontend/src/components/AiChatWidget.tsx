@@ -2,24 +2,33 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, X, Send, Sparkles, User, ChevronRight, ShieldAlert } from 'lucide-react';
+import { Bot, X, Send, Sparkles, User, ChevronRight, ShieldAlert, Paperclip, FileText } from 'lucide-react';
+
+interface AttachedFile {
+  filename: string;
+  content: string; // Base64
+  contentType: string;
+  sizeBytes: number;
+}
 
 interface ChatMessage {
   sender: 'user' | 'ai';
   text: string;
   skills?: string[];
   isGuardrailBlocked?: boolean;
+  attachmentsCount?: number;
 }
 
 export function AiChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       sender: 'ai',
-      text: "👋 Hi! I'm Vedant's AI Assistant. Ask me anything about his engineering experience at PostQode, tech stack (React, Go, Spring Boot, NestJS), or projects!",
+      text: "👋 Hi! I'm Vedant's AI Assistant. Ask me anything about his engineering experience at PostQode, tech stack (React, Go, Spring Boot, NestJS), or projects! You can also attach files (ZIP, PDF, DOCX) to message Vedant directly.",
     },
   ]);
 
@@ -27,20 +36,60 @@ export function AiChatWidget() {
     setMounted(true);
   }, []);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Str = reader.result as string;
+        setAttachments((prev) => [
+          ...prev,
+          {
+            filename: file.name,
+            content: base64Str,
+            contentType: file.type || 'application/octet-stream',
+            sizeBytes: file.size,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    e.target.value = '';
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!query.trim() || isLoading) return;
 
     const userText = query.trim();
+    const currentAttachments = [...attachments];
     setQuery('');
-    setMessages((prev) => [...prev, { sender: 'user', text: userText }]);
+    setAttachments([]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: 'user',
+        text: userText,
+        attachmentsCount: currentAttachments.length,
+      },
+    ]);
     setIsLoading(true);
 
     try {
       const res = await fetch('http://localhost:5001/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: userText }),
+        body: JSON.stringify({
+          query: userText,
+          attachments: currentAttachments.length > 0 ? currentAttachments : undefined,
+        }),
       });
       const data = await res.json();
       setMessages((prev) => [
@@ -214,13 +263,45 @@ export function AiChatWidget() {
               </button>
             </div>
 
+            {/* Attachments Tag List */}
+            {attachments.length > 0 && (
+              <div className="px-3 py-1.5 bg-black/90 border-t border-emerald-500/10 flex flex-wrap gap-1 text-[10px] font-mono">
+                {attachments.map((att, i) => (
+                  <span
+                    key={i}
+                    className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/30 text-emerald-300 flex items-center gap-1"
+                  >
+                    <FileText className="w-3 h-3 text-emerald-400" />
+                    <span className="max-w-[100px] truncate">{att.filename}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(i)}
+                      className="hover:text-rose-400 transition-colors ml-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* Input Form */}
-            <form onSubmit={handleSend} className="p-3 bg-black border-t border-emerald-500/20 flex gap-2">
+            <form onSubmit={handleSend} className="p-3 bg-black border-t border-emerald-500/20 flex gap-2 items-center">
+              <label className="p-2 rounded-sm bg-black/80 hover:bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-pointer transition-colors" title="Attach file (PDF, DOCX, ZIP, Image)">
+                <Paperclip className="w-4 h-4" />
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  accept=".pdf,.docx,.doc,.zip,.png,.jpg,.jpeg,.txt,.csv"
+                />
+              </label>
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ask about Vedant's experience or skills..."
+                placeholder="Ask AI or type message to Vedant..."
                 className="flex-1 bg-black/60 text-emerald-100 placeholder-emerald-700/60 px-3 py-2 rounded-sm text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 border border-emerald-500/20 font-mono"
               />
               <button

@@ -2,7 +2,14 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Terminal, Cpu } from 'lucide-react';
+import { Send, Mail, Phone, MapPin, CheckCircle2, AlertCircle, Terminal, Paperclip, X, FileText } from 'lucide-react';
+
+interface AttachedFile {
+  filename: string;
+  content: string; // Base64
+  contentType: string;
+  sizeBytes: number;
+}
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -12,7 +19,7 @@ export default function ContactPage() {
     company: '',
     message: '',
   });
-
+  const [attachments, setAttachments] = useState<AttachedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responseState, setResponseState] = useState<{
     success: boolean;
@@ -24,16 +31,49 @@ export default function ContactPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64Str = reader.result as string;
+        setAttachments((prev) => [
+          ...prev,
+          {
+            filename: file.name,
+            content: base64Str,
+            contentType: file.type || 'application/octet-stream',
+            sizeBytes: file.size,
+          },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    e.target.value = '';
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setResponseState(null);
 
     try {
+      const payload = {
+        ...formData,
+        attachments: attachments.length > 0 ? attachments : undefined,
+      };
+
       const res = await fetch('http://localhost:5001/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -45,6 +85,7 @@ export default function ContactPage() {
           details: data.details,
         });
         setFormData({ name: '', email: '', subject: '', company: '', message: '' });
+        setAttachments([]);
       } else {
         const errorMsg = Array.isArray(data.message) ? data.message.join(', ') : data.message || 'Failed to submit form.';
         setResponseState({
@@ -273,6 +314,52 @@ export class ContactService {
                 placeholder="Write your message here (at least 10 characters)..."
                 className="w-full bg-black/70 border border-emerald-500/20 rounded-sm px-4 py-2.5 text-xs text-emerald-50 placeholder-emerald-700/60 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               />
+            </div>
+
+            {/* File Attachments Uploader (PDF, DOCX, ZIP, PNG, etc.) */}
+            <div className="space-y-2 pt-1 border-t border-emerald-500/10">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-emerald-100/70 font-mono flex items-center gap-1.5">
+                  <Paperclip className="w-3.5 h-3.5 text-emerald-400" />
+                  Attach Files (PDF, DOCX, ZIP, Images up to 40MB)
+                </label>
+                <label className="cursor-pointer text-[11px] font-mono font-bold px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 transition-all inline-flex items-center gap-1">
+                  <Paperclip className="w-3 h-3 text-emerald-400" />
+                  <span>Choose Files</span>
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    accept=".pdf,.docx,.doc,.zip,.png,.jpg,.jpeg,.txt,.csv"
+                  />
+                </label>
+              </div>
+
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {attachments.map((att, i) => (
+                    <div
+                      key={i}
+                      className="px-2.5 py-1 rounded-sm bg-black/80 border border-emerald-500/30 flex items-center gap-2 text-xs font-mono text-emerald-200"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="max-w-[150px] truncate">{att.filename}</span>
+                      <span className="text-[10px] text-emerald-500/60">
+                        ({(att.sizeBytes / 1024).toFixed(0)} KB)
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(i)}
+                        className="text-emerald-500/60 hover:text-rose-400 transition-colors ml-1"
+                        aria-label="Remove File"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <button
