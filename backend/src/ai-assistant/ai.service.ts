@@ -1,14 +1,39 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ContactService } from '../contact/contact.service';
 
 export interface AiChatResponse {
   answer: string;
   relevantSkills: string[];
   isGuardrailBlocked?: boolean;
+  contactFormSubmitted?: boolean;
+  contactDetails?: any;
 }
 
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name);
+
+  constructor(private readonly contactService: ContactService) {}
+
+  private readonly contactToolDefinition = {
+    type: 'function',
+    function: {
+      name: 'submit_contact_form',
+      description:
+        "Submits a contact inquiry directly to Vedant Khatri's email and saves it to MongoDB. Call this tool whenever the user wants to send a message, get in touch, or submit a contact request to Vedant.",
+      parameters: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: "The sender's name" },
+          email: { type: 'string', description: "The sender's email address" },
+          subject: { type: 'string', description: 'Subject or purpose of the message' },
+          message: { type: 'string', description: 'The message body' },
+          company: { type: 'string', description: 'Optional company name' },
+        },
+        required: ['name', 'email', 'subject', 'message'],
+      },
+    },
+  };
 
   private readonly knowledgeBase = {
     name: 'Vedant Khatri',
@@ -67,11 +92,15 @@ VEDANT KHATRI'S PROFILE & RESUME KNOWLEDGE BASE:
     4. Advance Frontend Development: https://drive.google.com/file/d/1I-UzxF1jl6YSxFvkMEG6gcODTyV1qNbY/view
     5. Backend Development Architecture: https://drive.google.com/file/d/1AfTfQJOayswoLVr3ppr1zsBZUP4DGc0Z/view
 
+CONTACT FORM TOOL CAPABILITY:
+You have access to a tool named "submit_contact_form".
+If the user asks to send a message, email, reach out, or contact Vedant (e.g. "Send a message to Vedant: My name is Alice (alice@tech.com), subject: Job Offer, message: We want to hire you"), YOU MUST CALL THE "submit_contact_form" tool with name, email, subject, and message.
+If any required field (name, email, subject, message) is missing, politely ask the user for the missing detail so you can submit the contact form for them!
+
 STRICT GUARDRAIL RULES:
-1. IF the question is related to Vedant Khatri (skills, work history, projects, tech stack, education, contact info, hiring, etc.), answer concisely, professionally, and accurately using the knowledge base above.
-2. IF the question is NOT related to Vedant Khatri (e.g. general trivia, coding tutorials unrelated to Vedant, math, weather, news, recipes, writing general code/essays), YOU MUST DECLINE IMMEDIATELY with the exact message:
+1. IF the question is related to Vedant Khatri or sending a contact message, answer concisely, professionally, and accurately.
+2. IF the question is NOT related to Vedant Khatri (e.g. general trivia, coding tutorials unrelated to Vedant, math, weather, news), YOU MUST DECLINE IMMEDIATELY with the exact message:
 "${this.guardrailMessage}"
-3. DO NOT answer off-topic questions under any circumstances.
 `;
   }
 
@@ -79,42 +108,60 @@ STRICT GUARDRAIL RULES:
     const openRouterApiKey = process.env.OPENROUTER_API_KEY;
     const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     const openAiApiKey = process.env.OPENAI_API_KEY;
-    const model = process.env.AI_MODEL || 'openai/gpt-4o-mini';
+    const model = process.env.AI_MODEL || 'liquid/lfm-2.5-2.6b:free';
 
     // 1. If OpenRouter API Key is provided
     if (openRouterApiKey) {
-      try {
-        this.logger.log(`Dispatching query to OpenRouter using model: ${model}`);
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${openRouterApiKey}`,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'http://localhost:3000',
-            'X-Title': process.env.OPENROUTER_SITE_NAME || 'Vedant Khatri Portfolio',
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: this.buildSystemPrompt() },
-              { role: 'user', content: query },
-            ],
-            temperature: 0.2,
-          }),
-        });
+      const candidateModels = Array.from(
+        new Set([model, 'liquid/lfm-2.5-2.6b:free', 'inclusionai/ling-3.0-flash-sante:free'])
+      );
+      for (const m of candidateModels) {
+        try {
+          this.logger.log(`Dispatching query to OpenRouter using model: ${m}`);
+          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${openRouterApiKey}`,
+              'Content-Type': 'application/json',
+              'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'http://localhost:3000',
+              'X-Title': process.env.OPENROUTER_SITE_NAME || 'Vedant Khatri Portfolio',
+            },
+            body: JSON.stringify({
+              model: m,
+              messages: [
+                { role: 'system', content: this.buildSystemPrompt() },
+                { role: 'user', content: query },
+              ],
+              tools: [this.contactToolDefinition],
+              temperature: 0.2,
+            }),
+          });
 
-        const data = await response.json();
-        if (data?.choices?.[0]?.message?.content) {
-          const answer = data.choices[0].message.content.trim();
-          const isBlocked = answer.includes("exclusively to answer questions about Vedant Khatri");
-          return {
-            answer,
-            relevantSkills: isBlocked ? [] : this.extractRelevantSkills(query),
-            isGuardrailBlocked: isBlocked,
-          };
+          const data = await response.json();
+          const messageObj = data?.choices?.[0]?.message;
+
+          // Check if LLM initiated a tool call to submit contact form
+          if (messageObj?.tool_calls && messageObj.tool_calls.length > 0) {
+            const toolCall = messageObj.tool_calls[0];
+            if (toolCall.function?.name === 'submit_contact_form') {
+              return this.executeContactFormTool(toolCall.function.arguments);
+            }
+          }
+
+          if (messageObj?.content) {
+            const answer = messageObj.content.trim();
+            const isBlocked = answer.includes("exclusively to answer questions about Vedant Khatri");
+            return {
+              answer,
+              relevantSkills: isBlocked ? [] : this.extractRelevantSkills(query),
+              isGuardrailBlocked: isBlocked,
+            };
+          } else {
+            this.logger.warn(`OpenRouter model [${m}] failed/rate-limited:`, data?.error?.metadata?.raw || data?.error?.message || 'No content');
+          }
+        } catch (err) {
+          this.logger.error(`OpenRouter API call failed for model ${m}:`, err);
         }
-      } catch (err) {
-        this.logger.error('OpenRouter API call failed:', err);
       }
     }
 
@@ -181,13 +228,22 @@ STRICT GUARDRAIL RULES:
               { role: 'system', content: this.buildSystemPrompt() },
               { role: 'user', content: query },
             ],
+            tools: [this.contactToolDefinition],
             temperature: 0.2,
           }),
         });
 
         const data = await response.json();
-        if (data?.choices?.[0]?.message?.content) {
-          const answer = data.choices[0].message.content.trim();
+        const messageObj = data?.choices?.[0]?.message;
+        if (messageObj?.tool_calls && messageObj.tool_calls.length > 0) {
+          const toolCall = messageObj.tool_calls[0];
+          if (toolCall.function?.name === 'submit_contact_form') {
+            return this.executeContactFormTool(toolCall.function.arguments);
+          }
+        }
+
+        if (messageObj?.content) {
+          const answer = messageObj.content.trim();
           const isBlocked = answer.includes("exclusively to answer questions about Vedant Khatri");
           return {
             answer,
@@ -200,8 +256,40 @@ STRICT GUARDRAIL RULES:
       }
     }
 
-    // 3. Intelligent Local Fallback Engine with Strict Topic Classification Guardrail
+    // 4. Intelligent Local Fallback Engine with Strict Topic Classification Guardrail
     return this.processLocalGuardrail(query);
+  }
+
+  private async executeContactFormTool(argsJson: string | object): Promise<AiChatResponse> {
+    try {
+      const args = typeof argsJson === 'string' ? JSON.parse(argsJson) : argsJson;
+      const name = args.name || 'Website Visitor';
+      const email = args.email || 'visitor@portfolio.com';
+      const subject = args.subject || 'Inquiry via AI Assistant Tool';
+      const message = args.message || 'No message provided';
+      const company = args.company || '';
+
+      const submission = await this.contactService.handleContactSubmission({
+        name,
+        email,
+        subject,
+        message,
+        company,
+      });
+
+      return {
+        answer: `✅ **Contact Form Submitted Successfully!**\n\nI have submitted your message directly to Vedant Khatri's email and stored the record in MongoDB.\n\n**Details Delivered:**\n- **Name:** ${name}\n- **Email:** ${email}\n- **Subject:** ${subject}\n- **Message:** ${message}${company ? `\n- **Company:** ${company}` : ''}`,
+        relevantSkills: ['Contact Form Tool', 'Resend API', 'MongoDB'],
+        contactFormSubmitted: true,
+        contactDetails: { name, email, subject, message, company, id: submission.details?.id },
+      };
+    } catch (err) {
+      this.logger.error('Failed executing contact tool call:', err);
+      return {
+        answer: 'Failed to submit contact form via AI assistant. Please use the interactive contact form on the /contact page directly.',
+        relevantSkills: [],
+      };
+    }
   }
 
   private processLocalGuardrail(query: string): AiChatResponse {

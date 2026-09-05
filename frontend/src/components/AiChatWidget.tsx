@@ -205,6 +205,13 @@ export function AiChatWidget() {
               >
                 Top Skills <ChevronRight className="w-3 h-3 text-emerald-400" />
               </button>
+              <button
+                type="button"
+                onClick={() => suggestQuestion('Send a message to Vedant: Name: [Your Name], Email: [your.email@example.com], Subject: [Subject], Message: [Your message here...]')}
+                className="px-2 py-1 rounded-sm bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 whitespace-nowrap transition-colors flex items-center gap-1 border border-emerald-500/20"
+              >
+                Contact Vedant <ChevronRight className="w-3 h-3 text-emerald-400" />
+              </button>
             </div>
 
             {/* Input Form */}
