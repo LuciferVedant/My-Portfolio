@@ -82,6 +82,15 @@ export function AiChatWidget() {
     ]);
     setIsLoading(true);
 
+    // Format sliding window conversation history (last 6 messages max for memory context)
+    const historyPayload = messages
+      .filter((m) => m.text && (m.sender === 'user' || m.sender === 'ai'))
+      .slice(-6)
+      .map((m) => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text,
+      }));
+
     try {
       const res = await fetch('http://localhost:5001/api/ai/chat', {
         method: 'POST',
@@ -89,6 +98,7 @@ export function AiChatWidget() {
         body: JSON.stringify({
           query: userText,
           attachments: currentAttachments.length > 0 ? currentAttachments : undefined,
+          history: historyPayload.length > 0 ? historyPayload : undefined,
         }),
       });
       const data = await res.json();

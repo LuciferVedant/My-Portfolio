@@ -104,11 +104,30 @@ STRICT GUARDRAIL RULES:
 `;
   }
 
-  async processUserQuery(query: string, incomingAttachments?: any[]): Promise<AiChatResponse> {
+  async processUserQuery(
+    query: string,
+    incomingAttachments?: any[],
+    history?: Array<{ role: 'user' | 'assistant'; content: string }>,
+  ): Promise<AiChatResponse> {
     const openRouterApiKey = process.env.OPENROUTER_API_KEY;
     const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     const openAiApiKey = process.env.OPENAI_API_KEY;
     const model = process.env.AI_MODEL || 'liquid/lfm-2.5-2.6b:free';
+
+    // Build sliding window conversation history (last 6 messages max for memory context)
+    const formattedHistory = (history || [])
+      .slice(-6)
+      .filter((h) => h && h.content && typeof h.content === 'string')
+      .map((msg) => ({
+        role: msg.role === 'assistant' ? 'assistant' : 'user',
+        content: msg.content,
+      }));
+
+    const apiMessages = [
+      { role: 'system', content: this.buildSystemPrompt() },
+      ...formattedHistory,
+      { role: 'user', content: query },
+    ];
 
     // 1. If OpenRouter API Key is provided
     if (openRouterApiKey) {
@@ -117,7 +136,7 @@ STRICT GUARDRAIL RULES:
       );
       for (const m of candidateModels) {
         try {
-          this.logger.log(`Dispatching query to OpenRouter using model: ${m}`);
+          this.logger.log(`Dispatching query to OpenRouter using model: ${m} (History context messages: ${formattedHistory.length})`);
           const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -128,10 +147,7 @@ STRICT GUARDRAIL RULES:
             },
             body: JSON.stringify({
               model: m,
-              messages: [
-                { role: 'system', content: this.buildSystemPrompt() },
-                { role: 'user', content: query },
-              ],
+              messages: apiMessages,
               tools: [this.contactToolDefinition],
               temperature: 0.2,
             }),
@@ -185,6 +201,10 @@ STRICT GUARDRAIL RULES:
                 parts: [{ text: this.buildSystemPrompt() }],
               },
               contents: [
+                ...formattedHistory.map((h) => ({
+                  role: h.role === 'assistant' ? 'model' : 'user',
+                  parts: [{ text: h.content }],
+                })),
                 {
                   parts: [{ text: query }],
                 },
@@ -224,10 +244,7 @@ STRICT GUARDRAIL RULES:
           },
           body: JSON.stringify({
             model: model.includes('/') ? model.split('/')[1] : model,
-            messages: [
-              { role: 'system', content: this.buildSystemPrompt() },
-              { role: 'user', content: query },
-            ],
+            messages: apiMessages,
             tools: [this.contactToolDefinition],
             temperature: 0.2,
           }),
