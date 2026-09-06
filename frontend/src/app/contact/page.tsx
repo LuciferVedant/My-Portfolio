@@ -70,7 +70,9 @@ export default function ContactPage() {
         attachments: attachments.length > 0 ? attachments : undefined,
       };
 
-      const res = await fetch('http://localhost:5001/api/contact', {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
+      const res = await fetch(`${API_BASE}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

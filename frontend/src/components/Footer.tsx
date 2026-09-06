@@ -8,7 +8,8 @@ export function Footer() {
   const [apiStatus, setApiStatus] = useState<{ status: string; uptime: number } | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:5001/api/health')
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+    fetch(`${API_BASE}/api/health`)
       .then((res) => res.json())
       .then((data) => setApiStatus({ status: data.status, uptime: data.uptimeSeconds }))
       .catch(() => setApiStatus(null));
