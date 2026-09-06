@@ -309,6 +309,7 @@ export class ContactService {
     }
 
     // 3. Persist Record to MongoDB using Mongoose ODM
+    let savedToMongo = false;
     if (this.contactModel) {
       try {
         const mongoRecord = new this.contactModel({
@@ -325,34 +326,37 @@ export class ContactService {
           submittedAt: new Date(),
         });
         await mongoRecord.save();
+        savedToMongo = true;
         this.logger.log(`Contact record persisted to MongoDB collection [contacts] with ${savedAttachmentMeta.length} attachment records.`);
       } catch (err) {
-        this.logger.warn('Failed to persist contact record to MongoDB:', err);
+        this.logger.warn('Failed to persist contact record to MongoDB, using local file DB fallback:', err);
       }
     }
 
-    // 4. Save Record to Local Database Storage Fallback
-    const newRecord: ContactLog = {
-      id: contactId,
-      name: dto.name,
-      email: dto.email,
-      subject: dto.subject,
-      message: dto.message,
-      company: dto.company,
-      submittedAt: timestamp,
-      ipAddress: clientIp || '127.0.0.1',
-      emailNotificationSent: emailSent,
-      webhookPushSent: webhookSent,
-      isSpamThrottled,
-    };
+    // 4. Save Record to Local File DB Fallback ONLY if MongoDB is offline or save failed
+    if (!savedToMongo) {
+      const newRecord: ContactLog = {
+        id: contactId,
+        name: dto.name,
+        email: dto.email,
+        subject: dto.subject,
+        message: dto.message,
+        company: dto.company,
+        submittedAt: timestamp,
+        ipAddress: clientIp || '127.0.0.1',
+        emailNotificationSent: emailSent,
+        webhookPushSent: webhookSent,
+        isSpamThrottled,
+      };
 
-    try {
-      const existingLogs = await this.getContactLogs();
-      existingLogs.unshift(newRecord);
-      fs.writeFileSync(this.dbFilePath, JSON.stringify(existingLogs, null, 2), 'utf-8');
-      this.logger.log(`Contact record [${contactId}] persisted to local database logs.`);
-    } catch (err) {
-      this.logger.error('Failed to save record to database:', err);
+      try {
+        const existingLogs = await this.getContactLogs();
+        existingLogs.unshift(newRecord);
+        fs.writeFileSync(this.dbFilePath, JSON.stringify(existingLogs, null, 2), 'utf-8');
+        this.logger.log(`Contact record [${contactId}] persisted to local JSON fallback database.`);
+      } catch (err) {
+        this.logger.error('Failed to save record to fallback file database:', err);
+      }
     }
 
     return {
